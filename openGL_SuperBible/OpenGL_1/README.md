@@ -132,3 +132,217 @@ glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 
 이때, 버퍼가 교체될때 드로잉 결과가 출력되므로 간접적으로 glFlush가 이뤄지고있음!!
+
+
+# OpenGL State Machine
+
+3D 그래픽에서 최종 결과물에 영향을 미치는 다양한 설정들을 OpenGL에서는 **state(상태)**라고 부릅니다. 이 state는 파이프라인 전반에 걸쳐 존재하며, 개발자는 이를 제어하고 저장/복구할 수 있습니다.
+
+---
+
+## 상태 제어 함수
+
+```c
+void glEnable(GLenum cap);        // 상태 활성화
+void glDisable(GLenum cap);       // 상태 비활성화
+GLboolean glIsEnabled(GLenum cap); // 상태 확인
+```
+
+예시 사용값:
+- `GL_DEPTH_TEST`
+- `GL_LIGHTING`
+- `GL_TEXTURE_2D` 등
+
+---
+
+## 상태값 조회 함수
+
+OpenGL 상태값은 다양한 타입으로 조회할 수 있습니다.
+
+```c
+void glGetBooleanv(GLenum pname, GLboolean *params);
+void glGetDoublev(GLenum pname, GLdouble *params);
+void glGetFloatv(GLenum pname, GLfloat *params);
+void glGetIntegerv(GLenum pname, GLint *params);
+```
+
+---
+
+## OpenGL STATE MACHINE 상태 스택 저장/복구
+
+OpenGL은 특정 상태들을 스택 구조로 저장하고 복원할 수 있습니다.
+
+```c
+void glPushAttrib(GLbitfield mask);  // 상태 저장
+void glPopAttrib(void);              // 상태 복원
+```
+
+- `GLbitfield`는 여러 상태를 OR 연산으로 합칠 수 있는 비트 플래그입니다.
+- 예시:
+
+```c
+glPushAttrib(GL_TEXTURE_BIT | GL_LIGHTING_BIT);
+```
+
+---
+
+## OpenGL Error Flags
+
+OpenGL은 함수 호출 오류 시 예외를 발생시키지 않고, 내부 오류 플래그에 기록합니다.
+
+```c
+GLenum glGetError(void);
+```
+
+### 반환 가능한 오류 코드:
+
+| 코드 | 설명 |
+|------|------|
+| `GL_NO_ERROR` | 오류 없음 |
+| `GL_INVALID_ENUM` | 잘못된 열거형 인자 |
+| `GL_INVALID_VALUE` | 잘못된 수치 인자 |
+| `GL_INVALID_OPERATION` | 현재 상태에 맞지 않는 명령어 |
+| `GL_STACK_OVERFLOW` | 상태 스택 오버플로우 |
+| `GL_STACK_UNDERFLOW` | 상태 스택 언더플로우 |
+| `GL_OUT_OF_MEMORY` | 메모리 부족 |
+| `GL_TABLE_TOO_LARGE` | 테이블이 너무 큼 |
+
+### 일반적인 오류 검사 패턴:
+
+```c
+while (glGetError() != GL_NO_ERROR) {
+    // 오류 처리
+}
+```
+
+---
+
+## gluErrorString - 오류 메시지 반환
+
+OpenGL의 보조 라이브러리 GLU는 오류 코드를 문자열로 바꿔주는 기능을 제공합니다.
+
+```c
+const GLubyte* gluErrorString(GLenum errorCode);
+```
+
+예시:
+- `GL_INVALID_ENUM` → `"invalid enumerant"`
+- 대부분의 OpenGL 오류는 해당 줄을 **무시하고 넘어감**.
+- 단, 포인터 인자를 사용하는 함수에서 **잘못된 메모리 접근** 시에는 **프로그램이 즉시 종료**
+
+
+# OpenGL 함수 레퍼런스
+
+OpenGL에서 자주 사용되는 주요 함수들을 범주별로 정리한 문서입니다. (Fixed-function pipeline 기준)
+
+---
+
+## 상태 제어 관련 (State Management)
+
+| 함수 | 설명 |
+|------|------|
+| `glEnable(GLenum cap)` | 특정 기능 활성화 |
+| `glDisable(GLenum cap)` | 특정 기능 비활성화 |
+| `glIsEnabled(GLenum cap)` | 기능이 켜져 있는지 확인 |
+| `glGetBooleanv`, `glGetFloatv`, `glGetIntegerv`, `glGetDoublev` | 상태값 조회 |
+| `glPushAttrib(GLbitfield mask)` | 상태 스택에 저장 |
+| `glPopAttrib()` | 스택에서 상태 복원 |
+
+---
+
+## 렌더링 관련 (Rendering)
+
+| 함수 | 설명 |
+|------|------|
+| `glBegin(GLenum mode)` | 도형 그리기 시작 (`GL_TRIANGLES`, `GL_QUADS` 등) |
+| `glEnd()` | 도형 그리기 종료 |
+| `glVertex*()` | 꼭짓점 지정 |
+| `glColor*()` | 색상 지정 |
+| `glNormal*()` | 노멀 벡터 지정 |
+| `glTexCoord*()` | 텍스처 좌표 지정 |
+| `glRectf()` | 사각형 그리기 (편의 함수) |
+| `glFlush()` | 명령 실행 보장 (싱글 버퍼용) |
+| `glFinish()` | 모든 명령 실행 완료까지 대기 |
+
+---
+
+## 변환 및 행렬 관련 (Transformations)
+
+| 함수 | 설명 |
+|------|------|
+| `glMatrixMode(GLenum mode)` | 현재 사용할 행렬 설정 (`GL_MODELVIEW`, `GL_PROJECTION`) |
+| `glLoadIdentity()` | 단위 행렬로 초기화 |
+| `glPushMatrix()` / `glPopMatrix()` | 현재 행렬 스택에 저장/복원 |
+| `glTranslatef(x, y, z)` | 평행 이동 |
+| `glRotatef(angle, x, y, z)` | 회전 |
+| `glScalef(x, y, z)` | 크기 조절 |
+| `glLoadMatrixf()` | 사용자 행렬 불러오기 |
+| `glMultMatrixf()` | 현재 행렬에 곱셈 |
+
+---
+
+## 조명 및 재질 관련 (Lighting & Materials)
+
+| 함수 | 설명 |
+|------|------|
+| `glEnable(GL_LIGHTING)` | 조명 활성화 |
+| `glEnable(GL_LIGHT0)` | 개별 광원 활성화 |
+| `glLightfv()` | 광원 속성 설정 |
+| `glMaterialfv()` | 재질 속성 설정 |
+| `glShadeModel(GL_FLAT / GL_SMOOTH)` | 음영 처리 방식 설정 |
+
+---
+
+## 텍스처 관련 (Texture Mapping)
+
+| 함수 | 설명 |
+|------|------|
+| `glEnable(GL_TEXTURE_2D)` | 2D 텍스처 활성화 |
+| `glTexImage2D()` | 텍스처 이미지 업로드 |
+| `glBindTexture()` | 텍스처 바인딩 |
+| `glTexParameteri()` | 텍스처 필터링/랩핑 설정 |
+| `glTexEnvf()` | 텍스처 환경 설정 |
+| `glGenTextures() / glDeleteTextures()` | 텍스처 생성 및 삭제 |
+
+---
+
+## 뷰포트 및 투영 설정 (Viewport & Projection)
+
+| 함수 | 설명 |
+|------|------|
+| `glViewport(x, y, width, height)` | 뷰포트 설정 |
+| `glOrtho()` | 직교 투영 |
+| `gluPerspective()` | 원근 투영 |
+| `gluLookAt()` | 카메라 위치 설정 |
+
+---
+
+## 오류 처리 관련
+
+| 함수 | 설명 |
+|------|------|
+| `glGetError()` | 에러 상태 플래그 반환 |
+| `gluErrorString()` | 에러 코드 → 문자열로 변환 |
+
+---
+
+## 기타
+
+| 함수 | 설명 |
+|------|------|
+| `glClearColor(r, g, b, a)` | 배경색 설정 |
+| `glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)` | 버퍼 초기화 |
+| `glDepthFunc()` | 깊이 테스트 설정 |
+| `glCullFace()` | 컬링 설정 (앞면/뒷면) |
+| `glPolygonMode()` | 폴리곤 그리기 방식 설정 |
+
+---
+
+## 참고 링크
+
+- OpenGL 2.1 Quick Reference Card: https://www.khronos.org/files/opengl-2.1-quick-reference-card.pdf  
+- OpenGL Red Book: https://www.glprogramming.com/red/
+
+
+
+  
