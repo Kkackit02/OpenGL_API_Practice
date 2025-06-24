@@ -1,348 +1,245 @@
 # Part 1 Classic OpenGL
+## geomtric transformation and pipeline
+Modeling Transformation -> Projection Transformation(Perspective -> Orthographic) -> ViewPort Transformation
 
-# 3D 그래픽과 OpenGL
+변환 파이프라인
 
-즉시 모드와 보류 모드
+M' = (F^(-1) M F)
 
-### 보류 모드(retained mode)
+  
 
-물체, 장면 정보를 API에 제공하면, 내부적인 처리를 거쳐 화면에 출력
 
-모든 물체를 씬그래프에 넣어두고, 추가적인 정보만 제공해 화면을 그려냄.
+### Vertex 이동
 
-### 즉시모드(immediate mode)
+- void glTranslatef(GLfloat x, GLfloat y, GLfloat z);
+- glTranslatef(0.0f, 10.0f, 0.0f);
 
-API가 이 방식으로 이루어져있으며, 그래픽 프로세서에 직접적인 명령을 전달해 그 상태를 변경하고, 이어지는 모든 명령에 영향을 준다.
+### 회전
+- glRotatef(GLfloat 각도, GLfloat x, GLfloat y, GLfloat z);
+- 회전은 반시계기준!!
 
-이미 실행된 명령에 대해서는 그 후 내린 명령이 아무런 영향을 주지 못한다.
+- Scale
+- glScalef(GLfloat x, GLfloat y, GLfloat z);
 
-### 뷰포트(ViewPort)
 
-클리핑 영역과 창의 픽셀수가 정확히 맞아떨어지지않기때문에
+### 단위행렬
+코드에 있는 각각의 변환은 누적된다..
+그래서 각각의 실행이 영향을 미친다.
 
-논리적 직교 좌표를 물리적인 화면 픽셀 좌표로 전환하는 과정에 쓰는 것이 뷰포트
+따라서 모델뷰 행렬을 단위행렬 I 로 초기화해줌으로써
+현재까지의 변환 내용을 무시하고, 깨끗한 상태로 새로운 변환을 할 수 있음 
 
-### 투영(Projection)
+- glMatrixMode(GL_MODELVIEW);
+- glLoadIdentity() // 단위 행렬로 초기화
+- 변환 1
+- 변환 2
+- glLoadIdentity()
+- 변환 3
+변환 3은 아무런 영향도 받지않고 자신의 변환만 수행할수있다.
 
-3D 좌표계에서 만들어진 지오메트리를 편평한 2D 공간으로 옮기는것
+### 행렬 스택
+각 물체를 지정할때마다 단위행렬로 모델뷰 행렬을 초기화하는것보다..
 
-## OpenGL
+행렬 스택을 이용하자
 
-그래픽 하드웨어 제어를 위한 소프트웨어 인터페이스
+모델뷰 행렬, 투영 행렬을 저장해둘 수 있는 공간으로
+필요할때 꺼내 쓰는 스택이다!
 
-모태는 실리콘그래픽스의 IRIS GL
+- glGet(GL_MAX_MODELVIEW_STACK_DEPTH); // 모델뷰 행렬의 최대 깊이
+- glGET(GL_MAX_PROJECTION_STACK_DEPTH); //투영 행렬의 최대 깊이
 
-하드웨어의 3D 가속 기능을 사용한 Implementation , 그렇지 않은 implementation으로 나눠짐
 
-## DirectX
+### 원근 투영
+- void gluPerspective(GLdouble 시야각, GLdouble 종횡비, GLdouble z앞면, GLdouble z뒷면);
 
-보다 openGL이 훨씬 편리하다
 
-opengl32.dll에 들어있음.(System Directory) (3D 렌더링 등 지원)
+# Solar System lololol
 
-glu32.dll(GLU 오픈gl 유틸리티 라이브러리)(행렬계산, 여러 기능 지원)
 
-gl.h (모든 openGL 함수, 타입, 매크로)
+https://github.com/user-attachments/assets/82c38567-7e27-46b8-b0fe-6dae6c741a0d
 
-| GLbyte | 8비트 정수 |
-| --- | --- |
-| GLshort | 16비트 정수 |
-| GLint, GLsizei | 32비트 정수 |
-| GLfloat, GLclampf | 32비트 실수 |
-| GLdouble, GLclampd | 64비트 실수 |
-| GLubyte, GLboolean | 8비트 부호없는 정수 |
-| GLushort | 16비트 부호없는 정수 |
-| GLunit, GLenum, GLbitfield | 32비트 부호없는 정수 |
 
-### openGL 함수 이름짓기 규칙
 
-<라이브러리 접두어><루트명령어>선택적인 인자수><선택적인 인자타입>
+# 보다 발전된 형태의 행렬 제어
 
-gl - Color - 3f - (….)
+openGL에서는 4x4 행렬을 이차원 실수 배열이 아닌, 16개의 실수값을 가진 하나의 배열로 표현한다.
+즉 수학 라이브러리와는 다르다
 
-glColor3f()
+- GLfloat matrix[16]; // OpenGL에서 쓰기 좋은 표현
+- GLfloat matrix[4][4]; // 흔히쓰지만, openGL에서는 비효율적
 
-3개의 float 인자를 가지는 Color
+![image](https://github.com/user-attachments/assets/dd081ade-0a92-40fa-9dfa-15b84ec6d9e9)
+열기준의 행렬정렬
 
-### float와 double
+16개의 값은 시각 좌표계의 세 축이 만들어내는 공간에서의 특정 위치를 표현한다.
+즉 
+![image](https://github.com/user-attachments/assets/72214b0b-8055-425c-b5f3-a442b74364c9)
 
-많은 c/c++ 컴파일러들이 float를 double로 인식
+- 처음 3개의 열은 x,y,z축에 대한 방향을 나타내는 역할을 한다.
+벡터는 크기뿐만이 아닌, 방향도 내포한다.
+마지막 4번째 열이 만들어내는 벡터는 변환된 좌표계의 x,y,z값을 포함한다.
 
-float 타입임을 명확히 지정해주자
+재밌는건
+또 다른 좌표계에서 4x4 행렬이 있을때 두 행렬을 곱해주면 새로운 좌표계로 변환된 vertex가 나온다.
 
-어차피 openGL은 내부적으로 float를 쓰므로..
+# 보다 발전된 형태의 행렬 제어
 
-두배 메모리 사용을 막기 위해서 명시해주자
+openGL에서는 4x4 행렬을 이차원 실수 배열이 아닌, 16개의 실수값을 가진 하나의 배열로 표현한다.
+즉 수학 라이브러리와는 다르다
 
-## 플랫폼 독립성
+- GLfloat matrix[16]; // OpenGL에서 쓰기 좋은 표현
+- GLfloat matrix[4][4]; // 흔히쓰지만, openGL에서는 비효율적
 
-openGL은 창, 화면관리를 위한 함수나 명령어가 한개도없음
+![image](https://github.com/user-attachments/assets/dd081ade-0a92-40fa-9dfa-15b84ec6d9e9)
+열기준의 행렬정렬
 
-키보드 입력, 마우스 제어 함수도 전혀없다.
+16개의 값은 시각 좌표계의 세 축이 만들어내는 공간에서의 특정 위치를 표현한다.
+즉 
+![image](https://github.com/user-attachments/assets/72214b0b-8055-425c-b5f3-a442b74364c9)
 
-→ openGL 디자이너의 최종 목표가 플랫폼 독립성이기때문
+- 처음 3개의 열은 x,y,z축에 대한 방향을 나타내는 역할을 한다.
+벡터는 크기뿐만이 아닌, 방향도 내포한다.
+마지막 4번째 열이 만들어내는 벡터는 변환된 좌표계의 x,y,z값을 포함한다.
 
-### GLUT(OpenGL Utility Toolkit)
+재밌는건
+또 다른 좌표계에서 4x4 행렬이 있을때 두 행렬을 곱해주면 새로운 좌표계로 변환된 vertex가 나온다.
 
-GLU는 OpenGl Utility Library이니 헷갈리지 말 것
 
-팜업메뉴, 창 관리 등… 윈도우에 맞게 쓸수있는 툴!!
+# 보다 발전된 형태의 행렬 제어
 
+openGL에서는 4x4 행렬을 이차원 실수 배열이 아닌, 16개의 실수값을 가진 하나의 배열로 표현한다.
+즉 수학 라이브러리와는 다르다
 
+- GLfloat matrix[16]; // OpenGL에서 쓰기 좋은 표현
+- GLfloat matrix[4][4]; // 흔히쓰지만, openGL에서는 비효율적
 
---------------------------------------
-# 실습
-![image](https://github.com/user-attachments/assets/8db4f374-c187-4b29-9b10-f51b30476193)
+![image](https://github.com/user-attachments/assets/dd081ade-0a92-40fa-9dfa-15b84ec6d9e9)
+열기준의 행렬정렬
 
+16개의 값은 시각 좌표계의 세 축이 만들어내는 공간에서의 특정 위치를 표현한다.
+즉 
+![image](https://github.com/user-attachments/assets/72214b0b-8055-425c-b5f3-a442b74364c9)
 
-# 2-2
-resize Squere (set aspect Ratio) 
-![image](https://github.com/user-attachments/assets/fe0657ea-5b52-4f77-9820-e245052124ee)
+- 처음 3개의 열은 x,y,z축에 대한 방향을 나타내는 역할을 한다.
+벡터는 크기뿐만이 아닌, 방향도 내포한다.
+마지막 4번째 열이 만들어내는 벡터는 변환된 좌표계의 x,y,z값을 포함한다.
 
-![image](https://github.com/user-attachments/assets/cc2a7431-b2b3-4b72-bce5-d51130522aad)
+재밌는건
+또 다른 좌표계에서 4x4 행렬이 있을때 두 행렬을 곱해주면 새로운 좌표계로 변환된 vertex가 나온다.
 
+Result = A × B
+이는 행렬 A에서 B로 좌표계를 변환한다는 것이다.
+### 즉 OpenGL은 Column-Major-Order이다. (열 우선 정렬)
 
-## 만약 Resize와 동시에 좌표계를 변경하지않는다면..
-![image](https://github.com/user-attachments/assets/e1d2a228-50ea-493a-ad27-3a3f55ac04f6)
 
+# 행렬의 로딩
 
+- glLoadMatrixf(GLfloat m);
+- glLoadMatrixd(Glfloat m);
 
+- 대부분 float타입으로 저장하니, 두번째 줄 matrixd는 타입 변환이 따로 이뤄짐(손해)
 
-## Move BOX!
+물론 아래와같은 전치행렬을 얻어내는 함수를 쓰면
+행 기준 정렬 행렬도 로딩 가능
+- void glLoadTransposeMatrixf(GLfloat m);
 
 
-	glutTimerFunc(33, TimerFunction, 1);  <- 시간 호출로 움직이게 구현
+### 4.5 torus
+https://github.com/user-attachments/assets/26080997-8691-42fe-abdc-ebab4d68775a
 
+# 카메라와 액터를 사용한 OpenGL에서의 이동
 
-### 싱글 버퍼
-https://github.com/user-attachments/assets/58eecfa6-113a-4cf9-b576-ea38bb5fb130
+3d 장면에서 물체의 위치와 방향을 표현하기 위해서는 4x4 행렬이 필요하다.
 
-### DOUBLE BUFFER
-https://github.com/user-attachments/assets/9807b107-5b55-4aae-bffc-d8f2ec8cc345
+이런 행렬 제어를 손쉽게 하는게 좋을것. 
 
-## 더블 버퍼링?
-스크린 버퍼에 렌더링이 이루어지는동안 드로잉 코드를 실행하는 것
 
-1) 렌더링 시간이 걸릴때 : 이미지가 그려지는 모습을 사용자에게 보여주지않고 한번에 보여주기위해서
-2) 애니메이션 : 프레임을 그려두었다가 프레임을 바꾸어가며 애니메이션 효과 내기
+가만히 있는 배경과 다르게 움직이는 것들은 액터(actor)라고한다.
+이런 액터들은 변환이 자주 일어나기때문에 '참조 프레임' 또는 '로컬 객체 좌표계'를 가지고 있다
+Reference Frame or Local Object Cordinate
 
+### 액터 프레임
+참조 프레임을 구현하는 가장 간단하고 유연한 방법은
+- 공간 내 위치
+- 전면을 향하는 벡터
+- 위를 향하는 벡터
+를 데이터 구조로 만드는 것
 
-glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-->>>
-glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 
-이때, 버퍼가 교체될때 드로잉 결과가 출력되므로 간접적으로 glFlush가 이뤄지고있음!!
-
-
-# OpenGL State Machine
-
-3D 그래픽에서 최종 결과물에 영향을 미치는 다양한 설정들을 OpenGL에서는 **state(상태)**라고 부릅니다. 이 state는 파이프라인 전반에 걸쳐 존재하며, 개발자는 이를 제어하고 저장/복구할 수 있습니다.
-
----
-
-## 상태 제어 함수
 
 ```c
-void glEnable(GLenum cap);        // 상태 활성화
-void glDisable(GLenum cap);       // 상태 비활성화
-GLboolean glIsEnabled(GLenum cap); // 상태 확인
-```
+class GLFrame
+{
+	protected:
+	M3DVector3f vLocation;
+	M3DVector3f vUp;
+	M3DVector3f vForward;
+public:
+. . .
+};
 
-예시 사용값:
-- `GL_DEPTH_TEST`
-- `GL_LIGHTING`
-- `GL_TEXTURE_2D` 등
+//참조 프레임에서 4x4 행렬을 받아오는 코드
+// Derives a 4x4 transformation matrix from a frame of reference
 
----
-
-## 상태값 조회 함수
-
-OpenGL 상태값은 다양한 타입으로 조회할 수 있습니다.
-
-```c
-void glGetBooleanv(GLenum pname, GLboolean *params);
-void glGetDoublev(GLenum pname, GLdouble *params);
-void glGetFloatv(GLenum pname, GLfloat *params);
-void glGetIntegerv(GLenum pname, GLint *params);
-```
-
----
-
-## OpenGL STATE MACHINE 상태 스택 저장/복구
-
-OpenGL은 특정 상태들을 스택 구조로 저장하고 복원할 수 있습니다.
-
-```c
-void glPushAttrib(GLbitfield mask);  // 상태 저장
-void glPopAttrib(void);              // 상태 복원
-```
-
-- `GLbitfield`는 여러 상태를 OR 연산으로 합칠 수 있는 비트 플래그입니다.
-- 예시:
-
-```c
-glPushAttrib(GL_TEXTURE_BIT | GL_LIGHTING_BIT);
-```
-
----
-
-## OpenGL Error Flags
-
-OpenGL은 함수 호출 오류 시 예외를 발생시키지 않고, 내부 오류 플래그에 기록합니다.
-
-```c
-GLenum glGetError(void);
-```
-
-### 반환 가능한 오류 코드:
-
-| 코드 | 설명 |
-|------|------|
-| `GL_NO_ERROR` | 오류 없음 |
-| `GL_INVALID_ENUM` | 잘못된 열거형 인자 |
-| `GL_INVALID_VALUE` | 잘못된 수치 인자 |
-| `GL_INVALID_OPERATION` | 현재 상태에 맞지 않는 명령어 |
-| `GL_STACK_OVERFLOW` | 상태 스택 오버플로우 |
-| `GL_STACK_UNDERFLOW` | 상태 스택 언더플로우 |
-| `GL_OUT_OF_MEMORY` | 메모리 부족 |
-| `GL_TABLE_TOO_LARGE` | 테이블이 너무 큼 |
-
-### 일반적인 오류 검사 패턴:
-
-```c
-while (glGetError() != GL_NO_ERROR) {
-    // 오류 처리
+void GLFrame::GetMatrix(M3DTMatrix44f mMatrix, bool bRotationOnly = false)
+{
+	// Calculate the right side (x) vector, drop it right into the matrix
+	M3DVector3f vXAxis;
+	m3dCrossProduct(vXAxis, vUp, vForward);
+	// Set matrix column does not fill in the fourth value...
+	m3dSetMatrixColumn44(matrix, vXAxis, 0);
+	matrix[3] = 0.0f;
+	// Y Column
+	m3dSetMatrixColumn44(matrix, vUp, 1);
+	matrix[7] = 0.0f;
+	// Z Column
+	m3dSetMatrixColumn44(matrix, vForward, 2);
+	matrix[11] = 0.0f;
+	// Translation (already done)
+	if(bRotationOnly == true)
+	{
+	matrix[12] = 0.0f;
+	matrix[13] = 0.0f;
+	matrix[14] = 0.0f;
+	}
+	else
+	m3dSetMatrixColumn44(matrix, vOrigin, 3);
+	matrix[15] 
 }
 ```
 
----
+# 오일러각(Euler Angle)
+yaw pitch roll
 
-## gluErrorString - 오류 메시지 반환
+x   y     z
 
-OpenGL의 보조 라이브러리 GLU는 오류 코드를 문자열로 바꿔주는 기능을 제공합니다.
+
+항공기의 위치와 방향을 나타낼때도 사용한다.
+
+
+오일러 각은 불안정한 측면이 존재한다.
+- 하나의 위치와 방향은 서로 다른 오일러 각으로 표현이 가능
+- 특정 축을 기준으로 회전이 불가능해지는 Gimber Lock 현상 발생
+- 자체적으로 정의한 축을 기준으로 회전시킬때 시야를 따라 이동하는 것만으로는 새로운 좌표 계산이 어려ㅜㅇㅁ
+
+이에 대응하기 위해서 Quaternions을 도입하기도 한다.
+
+# 카메라 관리
+OpenGL에는 카메라 변환 기능이 없다.
+단지 카메라를 공간 내의 특정 위치에서 특정한 방향을 가진 물체로 처리하면
+3D 환명이 액터와 카메라에 대한 참조 프레임으로 표현이 가능하다.
 
 ```c
-const GLubyte* gluErrorString(GLenum errorCode);
+void gluLookAt(GLdouble eyex, GLdouble eyey, GLdouble eyez,
+GLdouble centerx, GLdouble centery, GLdouble centerz,
+GLdouble upx, GLdouble upy, GLdouble upz);
 ```
 
-예시:
-- `GL_INVALID_ENUM` → `"invalid enumerant"`
-- 대부분의 OpenGL 오류는 해당 줄을 **무시하고 넘어감**.
-- 단, 포인터 인자를 사용하는 함수에서 **잘못된 메모리 접근** 시에는 **프로그램이 즉시 종료**
+### 카메라 변환은 카메라의 액터 변환을 반대로 뒤집으면 된다..!!!
+![image](https://github.com/user-attachments/assets/faa25d88-c64e-4e72-8bd4-40ad0f3ba44f)
 
 
-# OpenGL 함수 레퍼런스
-
-OpenGL에서 자주 사용되는 주요 함수들을 범주별로 정리한 문서입니다. (Fixed-function pipeline 기준)
-
----
-
-## 상태 제어 관련 (State Management)
-
-| 함수 | 설명 |
-|------|------|
-| `glEnable(GLenum cap)` | 특정 기능 활성화 |
-| `glDisable(GLenum cap)` | 특정 기능 비활성화 |
-| `glIsEnabled(GLenum cap)` | 기능이 켜져 있는지 확인 |
-| `glGetBooleanv`, `glGetFloatv`, `glGetIntegerv`, `glGetDoublev` | 상태값 조회 |
-| `glPushAttrib(GLbitfield mask)` | 상태 스택에 저장 |
-| `glPopAttrib()` | 스택에서 상태 복원 |
-
----
-
-## 렌더링 관련 (Rendering)
-
-| 함수 | 설명 |
-|------|------|
-| `glBegin(GLenum mode)` | 도형 그리기 시작 (`GL_TRIANGLES`, `GL_QUADS` 등) |
-| `glEnd()` | 도형 그리기 종료 |
-| `glVertex*()` | 꼭짓점 지정 |
-| `glColor*()` | 색상 지정 |
-| `glNormal*()` | 노멀 벡터 지정 |
-| `glTexCoord*()` | 텍스처 좌표 지정 |
-| `glRectf()` | 사각형 그리기 (편의 함수) |
-| `glFlush()` | 명령 실행 보장 (싱글 버퍼용) |
-| `glFinish()` | 모든 명령 실행 완료까지 대기 |
-
----
-
-## 변환 및 행렬 관련 (Transformations)
-
-| 함수 | 설명 |
-|------|------|
-| `glMatrixMode(GLenum mode)` | 현재 사용할 행렬 설정 (`GL_MODELVIEW`, `GL_PROJECTION`) |
-| `glLoadIdentity()` | 단위 행렬로 초기화 |
-| `glPushMatrix()` / `glPopMatrix()` | 현재 행렬 스택에 저장/복원 |
-| `glTranslatef(x, y, z)` | 평행 이동 |
-| `glRotatef(angle, x, y, z)` | 회전 |
-| `glScalef(x, y, z)` | 크기 조절 |
-| `glLoadMatrixf()` | 사용자 행렬 불러오기 |
-| `glMultMatrixf()` | 현재 행렬에 곱셈 |
-
----
-
-## 조명 및 재질 관련 (Lighting & Materials)
-
-| 함수 | 설명 |
-|------|------|
-| `glEnable(GL_LIGHTING)` | 조명 활성화 |
-| `glEnable(GL_LIGHT0)` | 개별 광원 활성화 |
-| `glLightfv()` | 광원 속성 설정 |
-| `glMaterialfv()` | 재질 속성 설정 |
-| `glShadeModel(GL_FLAT / GL_SMOOTH)` | 음영 처리 방식 설정 |
-
----
-
-## 텍스처 관련 (Texture Mapping)
-
-| 함수 | 설명 |
-|------|------|
-| `glEnable(GL_TEXTURE_2D)` | 2D 텍스처 활성화 |
-| `glTexImage2D()` | 텍스처 이미지 업로드 |
-| `glBindTexture()` | 텍스처 바인딩 |
-| `glTexParameteri()` | 텍스처 필터링/랩핑 설정 |
-| `glTexEnvf()` | 텍스처 환경 설정 |
-| `glGenTextures() / glDeleteTextures()` | 텍스처 생성 및 삭제 |
-
----
-
-## 뷰포트 및 투영 설정 (Viewport & Projection)
-
-| 함수 | 설명 |
-|------|------|
-| `glViewport(x, y, width, height)` | 뷰포트 설정 |
-| `glOrtho()` | 직교 투영 |
-| `gluPerspective()` | 원근 투영 |
-| `gluLookAt()` | 카메라 위치 설정 |
-
----
-
-## 오류 처리 관련
-
-| 함수 | 설명 |
-|------|------|
-| `glGetError()` | 에러 상태 플래그 반환 |
-| `gluErrorString()` | 에러 코드 → 문자열로 변환 |
-
----
-
-## 기타
-
-| 함수 | 설명 |
-|------|------|
-| `glClearColor(r, g, b, a)` | 배경색 설정 |
-| `glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)` | 버퍼 초기화 |
-| `glDepthFunc()` | 깊이 테스트 설정 |
-| `glCullFace()` | 컬링 설정 (앞면/뒷면) |
-| `glPolygonMode()` | 폴리곤 그리기 방식 설정 |
-
----
-
-## 참고 링크
-
-- OpenGL 2.1 Quick Reference Card: https://www.khronos.org/files/opengl-2.1-quick-reference-card.pdf  
-- OpenGL Red Book: https://www.glprogramming.com/red/
-
-
-
-  
+동일한 기능을 하지만 참조 프레임을 사용하는 함수도 있다.
+```c
+void gltApplyCameraTransform(GLTFrame *pCamera);
+```
