@@ -64,3 +64,11 @@ glFrontFace(GL_CW);
 
 
 그 외에도 GL_QUADS, GL_QUADSTRIP, GL_POLYGON!!
+
+
+### 스티플링? 텍스쳐 매핑?
+
+스티플링은 그냥 물체 위에 그대로 얹는 것(회전영향 X)
+
+텍스처 매핑은 회전에도 다 영향을 받는다
+
