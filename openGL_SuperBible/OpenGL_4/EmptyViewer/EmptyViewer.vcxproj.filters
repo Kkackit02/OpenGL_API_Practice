@@ -18,22 +18,10 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="3-2.cpp">
+    <ClCompile Include="4-3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="3-3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="3-4.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="3-5.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="3-6.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="3-8.cpp">
+    <ClCompile Include="4-4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
