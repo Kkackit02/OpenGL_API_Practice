@@ -59,29 +59,6 @@ M' = (F^(-1) M F)
 https://github.com/user-attachments/assets/82c38567-7e27-46b8-b0fe-6dae6c741a0d
 
 
-
-# 보다 발전된 형태의 행렬 제어
-
-openGL에서는 4x4 행렬을 이차원 실수 배열이 아닌, 16개의 실수값을 가진 하나의 배열로 표현한다.
-즉 수학 라이브러리와는 다르다
-
-- GLfloat matrix[16]; // OpenGL에서 쓰기 좋은 표현
-- GLfloat matrix[4][4]; // 흔히쓰지만, openGL에서는 비효율적
-
-![image](https://github.com/user-attachments/assets/dd081ade-0a92-40fa-9dfa-15b84ec6d9e9)
-열기준의 행렬정렬
-
-16개의 값은 시각 좌표계의 세 축이 만들어내는 공간에서의 특정 위치를 표현한다.
-즉 
-![image](https://github.com/user-attachments/assets/72214b0b-8055-425c-b5f3-a442b74364c9)
-
-- 처음 3개의 열은 x,y,z축에 대한 방향을 나타내는 역할을 한다.
-벡터는 크기뿐만이 아닌, 방향도 내포한다.
-마지막 4번째 열이 만들어내는 벡터는 변환된 좌표계의 x,y,z값을 포함한다.
-
-재밌는건
-또 다른 좌표계에서 4x4 행렬이 있을때 두 행렬을 곱해주면 새로운 좌표계로 변환된 vertex가 나온다.
-
 # 보다 발전된 형태의 행렬 제어
 
 openGL에서는 4x4 행렬을 이차원 실수 배열이 아닌, 16개의 실수값을 가진 하나의 배열로 표현한다.
