@@ -220,3 +220,27 @@ GLdouble upx, GLdouble upy, GLdouble upz);
 ```c
 void gltApplyCameraTransform(GLTFrame *pCamera);
 ```
+
+
+정리하자면
+OpenGL에서의 "프레임(Frame)"은 단순히 하나의 위치나 방향을 넘어서, 로컬 좌표계(Local Coordinate System) 를 표현하는 구조.
+즉, 어떤 객체나 카메라가 현재 바라보는 방향 + 위치 를 하나로 묶어서 표현하고, 그에 따라 변환 행렬(ModelView Matrix) 을 구성하는데 활용된다.
+
+## 4-7 Sphere World!
+
+
+
+
+https://github.com/user-attachments/assets/e0e25632-4483-4dc1-8b18-8438b18c6f88
+
+
+
+1. 카메라 프레임 (frameCamera)
+- 플레이어 시점처럼 월드를 탐색할 수 있게 해 줌
+- 방향 전환 (RotateLocalY)과 이동 (MoveForward)을 프레임의 기준으로 수행
+- 실제 월드가 움직이는 것이 아니라, 카메라 프레임의 위치가 변할 뿐\
+  
+2. 구체들의 프레임 (spheres[i])
+- 각 구체마다 독립적인 로컬 좌표계를 가짐
+- SetOrigin(x, 0, z)으로 특정 위치에 고정
+- ApplyActorTransform()을 호출해 해당 프레임 기준의 모델 변환 적용
