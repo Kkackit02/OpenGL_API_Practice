@@ -1,90 +1,48 @@
-#include<windows.h>
+ï»¿#include<windows.h>
 #include<GL/gl.h>
 #include<GL/GLU.h>
 #include<GL/glut.h>
 
-GLfloat rsize = 25;
-//x,y ¹æÇâ ÀÌµ¿¼Óµµ
-GLfloat lightPos[] = { 0.0f, 0.0f, 0.0f, 1.0f };  // ÅÂ¾ç À§Ä¡ (¿ùµå ÁÂÇ¥)
-
-GLfloat windowWidth;
-GLfloat windowHeight;
 
 
-
-
-//2-3 openGL, GLUT¸¦ »ç¿ëÇÑ ¾Ö´Ï¸ŞÀÌ¼Ç
+//2-3 openGL, GLUTë¥¼ ì‚¬ìš©í•œ ì• ë‹ˆë©”ì´ì…˜
 void RenderScene(void)
 {
-	// Earth and moon angle of revolution
-	static float fMoonRot = 0.0f;
-	static float fEarthRot = 0.0f;
-	// Clear the window with current clearing color
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// Save the matrix state and do the rotations
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	// Translate the whole scene out and into view
-	glTranslatef(0.0f, 0.0f, -300.0f);
-	// Set material color, to yellow
-	// Sun
-	glColor3ub(255, 255, 0);
-	glDisable(GL_LIGHTING);
-	glutSolidSphere(15.0f, 15, 15);
-	glEnable(GL_LIGHTING);
-	// Position the light after we draw the Sun!
-	glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-	// Rotate coordinate system
-	glRotatef(fEarthRot, 0.0f, 1.0f, 0.0f);
-	// Draw the earth
-	glColor3ub(0, 0, 255);
-	glTranslatef(105.0f, 0.0f, 0.0f);
-	glutSolidSphere(15.0f, 15, 15);
-	// Rotate from Earth-based coordinates and draw moon
-	glColor3ub(200, 200, 200);
-	glRotatef(fMoonRot, 0.0f, 1.0f, 0.0f);
-	glTranslatef(30.0f, 0.0f, 0.0f);
-	fMoonRot += 15.0f;
-	if (fMoonRot > 360.0f)
-		fMoonRot = 0.0f;
-	glutSolidSphere(6.0f, 15, 15);
-	// Restore the matrix state
-	glPopMatrix(); // Modelview matrix
-	// Step Earth orbit 5 degrees
-	fEarthRot += 5.0f;
-	if (fEarthRot > 360.0f)
-		fEarthRot = 0.0f;
-	glutSwapBuffers();
-}
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // í™”ë©´ ì´ˆê¸°í™”
+	glShadeModel(GL_SMOOTH);
+
+	glLoadIdentity(); // ë§¤íŠ¸ë¦­ìŠ¤ ì´ˆê¸°í™”
+	glTranslatef(0.0f, 0.0f, -600.0f); // ì¹´ë©”ë¼ì—ì„œ ë’¤ë¡œ ì‚¼ê°í˜•ì„ ë³´ë‚´ê¸°
+
+	glBegin(GL_TRIANGLES);
+	
+	//ì ìƒ‰
+	glColor3ub((GLubyte)255, (GLubyte)0, (GLubyte)0);
+	glVertex3f(0.0f, 200.0f, 0.0f);
+
+	
+	glColor3ub((GLubyte)0, (GLubyte)255, (GLubyte)0);
+	glVertex3f(200.0f, -70.0f, 0.0f);
 
 
-void TimerFunction(int value)
-{
-	//´Ù½Ã ±×¸®±â
-	glutPostRedisplay();
-	glutTimerFunc(50, TimerFunction, 1);
+	glColor3ub((GLubyte)0, (GLubyte)0, (GLubyte)255);
+	glVertex3f(-200.0f, -70.0f, 0.0f);
+	glEnd();
+
+	glFlush();
+
 }
 
 
 void SetupRC(void)
 {
-	glEnable(GL_DEPTH_TEST);              // ±íÀÌ ¹öÆÛ »ç¿ë
-	glEnable(GL_LIGHTING);               // Á¶¸í »ç¿ë
-	glEnable(GL_LIGHT0);                 // 0¹ø ±¤¿ø È°¼ºÈ­
-	glEnable(GL_COLOR_MATERIAL);         // »ö»ó Àû¿ë È°¼ºÈ­
-
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE); // »ö»ó ¼Ó¼º ¼³Á¤
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);              // ¹è°æ °ËÁ¤glEnable(GL_DEPTH_TEST);              // ±íÀÌ ¹öÆÛ »ç¿ë
-    glEnable(GL_LIGHTING);               // Á¶¸í »ç¿ë
-    glEnable(GL_LIGHT0);                 // 0¹ø ±¤¿ø È°¼ºÈ­
-    glEnable(GL_COLOR_MATERIAL);         // »ö»ó Àû¿ë È°¼ºÈ­
-
-    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE); // »ö»ó ¼Ó¼º ¼³Á¤
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);              // ¹è°æ °ËÁ¤
+	glEnable(GL_DEPTH_TEST);              // ê¹Šì´ ë²„í¼ ì‚¬ìš©
+	glShadeModel(GL_SMOOTH);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);              // ë°°ê²½ ê²€ì •
 }
 
 
-//Ã¢ Å©±â°¡ º¯ÇÒ¶§ GLUT¿¡ ÀÇÇØ È£Ãâ
+//ì°½ í¬ê¸°ê°€ ë³€í• ë•Œ GLUTì— ì˜í•´ í˜¸ì¶œ
 void ChangeSize(GLsizei w, GLsizei h)
 {
 	GLfloat fAspect;
@@ -94,16 +52,17 @@ void ChangeSize(GLsizei w, GLsizei h)
 		h = 1;
 	}
 
-	glViewport(0, 0, w, h); // ºäÆ÷Æ® Á¤ÀÇ (x,y, ³Êºñ, ³ôÀÌ) -> ÇöÀç Å¬¸®ÇÎ ¿µ¿ªÀ» ÇØ´ç °ø°£¿¡ ¸ÅÇÎ
+	glViewport(0, 0, w, h); // ë·°í¬íŠ¸ ì •ì˜ (x,y, ë„ˆë¹„, ë†’ì´) -> í˜„ì¬ í´ë¦¬í•‘ ì˜ì—­ì„ í•´ë‹¹ ê³µê°„ì— ë§¤í•‘
 	fAspect = (GLfloat)w / (GLfloat)h;
 
-	glMatrixMode(GL_PROJECTION); // gl ÁÂÇ¥°è ÃÊ±âÈ­
+	glMatrixMode(GL_PROJECTION); // gl ì¢Œí‘œê³„ ì´ˆê¸°í™”
 	glLoadIdentity();
 
-	gluPerspective(45.0f, fAspect, 1.0f, 425.0);
+	gluPerspective(45.0f, fAspect, 1.0f, 1000.0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
 
 }
 
@@ -111,17 +70,17 @@ void ChangeSize(GLsizei w, GLsizei h)
 void main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-	glEnable(GL_DEPTH_TEST);
-	// sing buffer Ã¢À» ÀÇ¹Ì, »ö»ó¸ğµå¸¦ RGBA¸¦ ¾µ°Í
+	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
+	glutInitWindowSize(800, 800);
+	// sing buffer ì°½ì„ ì˜ë¯¸, ìƒ‰ìƒëª¨ë“œë¥¼ RGBAë¥¼ ì“¸ê²ƒ
 
-	glutCreateWindow("Solar");
-	glutDisplayFunc(RenderScene); // renderScene ÇÔ¼ö¸¦ Ãâ·ÂÄİ¹éÇÔ¼ö·Î ¸¸µé±â
+	glutCreateWindow("Interpolation Triangle");
+
+	glutDisplayFunc(RenderScene); // renderScene í•¨ìˆ˜ë¥¼ ì¶œë ¥ì½œë°±í•¨ìˆ˜ë¡œ ë§Œë“¤ê¸°
 	glutReshapeFunc(ChangeSize);
 
-	glutTimerFunc(33, TimerFunction, 1);
 
-	SetupRC(); //·»´õ¸µ Àü ÃÊ±âÈ­
+	SetupRC(); //ë Œë”ë§ ì „ ì´ˆê¸°í™”
 
 	glutMainLoop();
 }
