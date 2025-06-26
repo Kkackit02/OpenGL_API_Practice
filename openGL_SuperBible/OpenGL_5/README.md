@@ -88,3 +88,123 @@ glColor는 현재 드로잉의 색상을 지정하는것이다.
 
 
 즉 I = ka * ia + ks * is * max(0, n'h)^p + kd * id * max(0,n'l)
+
+### 조명 추가하기
+```cpp
+glEnable(GL_LIGHTING)
+```
+활성화시 장면 내에 있는 각 버텍스의 색상을 결정할때, material 속성과 lighting 인자를 계산에 넣게 된다.
+
+이러한 인자의 지정은 SetupRC 함수에서 이루어진다.
+
+### 조명 모델 설정하기
+```cpp
+glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientLight); //Ambient를 사용하도록 설정
+```
+
+### 재질 속성 설정하기
+2가지의 방법이 있다.
+1) 첫 번째 방법 :  각 폴리곤, 폴리곤 셋에 대하여 glMaterial 함수 호출해주기
+```cpp
+Glfloat gray[] = {0.75f, 0.75f, 0.75f, 1.0f);
+glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE , gray);
+
+glBegin(GL_TRIANGLES);
+glVertex3f(-15.0f, 0.0f, 30.0f);
+glVertex3f(0.0f, 15.0f, 30.0f);
+glVertex3f(0.0f, 0.0f, -56.0f);
+glEnd();
+```
+
+glMaterialfv의 
+- 첫 번째 인자는 어떤 면에 재질 속성을 설정할것인가이며,
+- 두 번째 인자는 어떤 속성을 설정할 것인가
+- 세 번째 인자는 RGBA값이 담긴 배열로 속성 설정
+
+이 호출 이후 나오는 모든 기본 모델들은 이 설정의 영향을 받게된다.
+
+2) 두 번째 방법 : 색상 트래킹(Color Tracking) 방식
+   재질에 대해 glColor 호출해주기
+```cpp
+
+glEnable(GL_COLOR_MATERIAL); //색상 트래킹이 가능하도록 설정
+glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE); // 폴리곤 앞면에 ambient, diffuse 적용 + glColor에서 설정한 값이 적용될 재질 인자 지정
+
+glcolor3f(0.75f, 0.75f, 0.75f);
+
+glbegin...
+...
+..
+
+
+```
+
+
+## 어떤 방향이 위쪽일까?
+
+openGL에서는 광원 지정시, 광원의 방향을 정해주어야 한다.
+
+모든 방향으로 뻗어나가는 광원도 있지만, 특정 뱡향으로 비춰지는 경우도 있기때문
+
+폴리곤 표면에 대한 쉐이딩 효과 계산을 위해서는 openGL이 조명방향과 물체 방향을 기준으로 각도 계산을 해야한다.
+
+![image](https://github.com/user-attachments/assets/2b18f749-13e9-4b59-99bc-1fa33c886960)
+
+위 그림과 같이 빛과 눈 사이의 각도 계산을 통해 조명 계산을 한다!
+
+
+폴리곤은 각 버텍스의 집합이며, 버텍스는 하나의 점이다.
+문제는 버텍스는 점이고, 조명은 선이다.
+
+점과 선 사이의 각도를 계산할 수 있는가?
+
+불가능하다
+
+그러므로 각 버텍스에 대한 조명 각도를 계산하기 위해서 각 버텍스에 대한 법선 벡터(normal Vector)를 활용해야한다.
+
+법선 벡터는 버텍스 기준으로 임의의 평면이 있다고 했을때, 그 평면과 90도를 이루게 하면 된다.
+
+![image](https://github.com/user-attachments/assets/00f4a2b9-8a2f-4c9a-b25c-72d4ed84ef82)
+
+### 왜 모든 버텍스에 대해 법선을 만들어야할까?
+
+폴리곤이 평면이 아닐수도있음..!
+완벽한 조명을 위해서는 모든 버텍스에 법선 벡터가 지정이 되어있어야한다.
+
+### 법선 벡터를 지정하기
+![image](https://github.com/user-attachments/assets/3eb88c01-b38f-47fd-92dd-6f15b1f77cca)
+
+다음과 같이 xz 평면 상의 한 면에서, (1,1,0)을 지나면서 이 면에 직각인 선을 기준으로
+
+그 선 위에 있는(y축 기준으로) 점을 하나 정한뒤(1,1,10)
+그 두 점을 이으면된다.
+```cpp
+glBegin(GL_TRIANGLES);
+glNormal3f(0.0f, -1.0f, 0.0f);
+glVertex3f(0.0f, 0.0f, 60.0f);
+glVertex3f(-15.0f, 0.0f, 30.0f);
+glVertex3f(15.0f,0.0f,30.0f);
+glEnd();
+```
+
+glNormal3f 함수는 이 삼각형의 표면과 직각을 이루는 법선 벡터를 지정하는 것이다.
+법선 벡터는 폴리곤의 앞면을 기준으로 뻗어나간다!
+
+따라서 법선 벡터가 나오는 부분에서 폴리곤을 보면, 버텍스는 CCW로 지정되어있을 것이다.
+
+### 단위 법선 벡터
+openGL 에서는 법선 벡터를 처리하기 위해서, 법선 벡터로 바꾸는 과정을 거친다.
+
+단위 법선(Unit Normal)이란 길이가 1인 법선 벡터를 말한다.(단위 자체가 길이가 1)
+
+이를 위해 정규화(Normalization)을 거친다.
+(벡터의 세 성분을 각각 제곱하고, 더한 값의 제곱근)
+
+조명과 관련된 모든 법선 벡터는 무조건 무조건 무조건 정규화가 되어야한다.
+```cpp
+glEnable(GL_NORMALIZE);
+```
+이 방식은 성능저하가 일어나기때문에
+가급적 직접 계산하는게 더 낫다!
+
+
