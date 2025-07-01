@@ -8,44 +8,6 @@
 GLfloat xRot = 47.0f;
 GLfloat yRot = 0.0f;
 
-// 토러스 그리기 함수
-void DrawTorus(GLfloat innerRadius, GLfloat outerRadius, GLint sides, GLint rings)
-{
-    float ringDelta = 2.0f * 3.14159265f / rings;
-    float sideDelta = 2.0f * 3.14159265f / sides;
-
-    for (int i = 0; i < rings; ++i) {
-        float theta = i * ringDelta;
-        float cosTheta = cos(theta);
-        float sinTheta = sin(theta);
-
-        float nextTheta = (i + 1) * ringDelta;
-        float cosNextTheta = cos(nextTheta);
-        float sinNextTheta = sin(nextTheta);
-
-        glBegin(GL_QUAD_STRIP);
-        for (int j = 0; j <= sides; ++j) {
-            float phi = j * sideDelta;
-            float cosPhi = cos(phi);
-            float sinPhi = sin(phi);
-            float dist = outerRadius + innerRadius * cosPhi;
-
-            float x = cosTheta * dist;
-            float y = -sinPhi * innerRadius;
-            float z = -sinTheta * dist;
-            glNormal3f(cosTheta * cosPhi, -sinPhi, -sinTheta * cosPhi);
-            glVertex3f(x, y, z);
-
-            x = cosNextTheta * dist;
-            y = -sinPhi * innerRadius;
-            z = -sinNextTheta * dist;
-            glNormal3f(cosNextTheta * cosPhi, -sinPhi, -sinNextTheta * cosPhi);
-            glVertex3f(x, y, z);
-        }
-        glEnd();
-    }
-}
-
 // 렌더링
 void RenderScene(void)
 {
@@ -55,9 +17,9 @@ void RenderScene(void)
     glTranslatef(0.0f, 0.0f, -2.5f);  // 뒤로 이동
     glRotatef(xRot, 1.0f, 0.0f, 0.0f);
     glRotatef(yRot, 0.0f, 1.0f, 0.0f); // Y축 회전
-    glColor3f(0.7f, 0.4f, 1.0f);
 
-    DrawTorus(0.2f, 0.5f, 30, 30);
+    glColor3f(0.7f, 0.4f, 1.0f);
+    glutSolidSphere(0.6f, 40, 40);  // 반지름 0.6, 세분화 40x40
 
     glPopMatrix();
 
@@ -75,14 +37,27 @@ void TimerFunction(int value)
 }
 
 // 초기화
-void SetupRC(void)
+void SetupRC()
 {
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glEnable(GL_COLOR_MATERIAL);
+    // 조명 설정
+    GLfloat ambientLight[] = { 0.3f, 0.3f, 0.3f, 1.0f };
+    GLfloat diffuseLight[] = { 0.7f, 0.7f, 0.7f, 1.0f };
+    GLfloat lightPos[] = { 1.0f, 1.0f, 1.0f, 0.0f };
 
+    glEnable(GL_DEPTH_TEST);
+    glFrontFace(GL_CCW);
+    glEnable(GL_CULL_FACE);
+
+    glEnable(GL_LIGHTING);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
+    glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+    glEnable(GL_LIGHT0);
+
+    glEnable(GL_COLOR_MATERIAL);
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+    glEnable(GL_NORMALIZE);
+
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
@@ -108,7 +83,7 @@ int main(int argc, char** argv)
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(600, 600);
-    glutCreateWindow("Rotating Torus");
+    glutCreateWindow("Rotating Sphere");
 
     glutDisplayFunc(RenderScene);
     glutReshapeFunc(ChangeSize);
