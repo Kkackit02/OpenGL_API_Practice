@@ -207,4 +207,49 @@ glEnable(GL_NORMALIZE);
 이 방식은 성능저하가 일어나기때문에
 가급적 직접 계산하는게 더 낫다!
 
+### 법선 벡터 구하기
+
+평면 폴리곤 세 지점 -> 법선 벡터
+1) 세 지점을 통해 두 벡터를 만든다.
+2) 두 벡터가 한 지점에서 서로 만나고 있다면..
+3) 두 벡터의 외적을 통해 법선 벡터를 구할 수 있다.
+
+
+법선 벡터는 미리 계산해두는 것이 효율적이다.
+
+###
+1) (Ambient , Diffuse)
+   
+https://github.com/user-attachments/assets/2603194a-e20f-4118-afd2-02c1c400610f
+
+
+2) specular 추가
+   
+https://github.com/user-attachments/assets/f0c45a15-83be-4d53-91a0-c6871fbda5da
+
+
+
+어라, specular가 이상하다!
+
+###
+구의 각 면에 대해 법선을 지정하면, 구는 거대한 보석처럼 될 것!
+![image](https://github.com/user-attachments/assets/a5d24a2a-d7a1-41f8-ad3f-5b1bfa09c532)
+
+
+사실 진짜 법선은 버텍스에 대한 법선이 표면의 진짜 법선일것이다.
+
+구체는 tangent line에 대한 법선을 통해 구할 수 있다.
+tangent line : 곡선의 한 점만 접하면서 뻗어나가고, 다른 부분과는 닿지않음.
+
+![image](https://github.com/user-attachments/assets/f8ebd14c-04bd-4c35-8f42-8f1fd6974c56)
+
+이를 통해 보다 부드러운 조명 계산이 가능하다.
+
+
+
+### 다만....
+구체만 편한거지, 복잡해지면 저렇게 못구한다!
+
+따라서 버텍스를 공유하는 폴리곤들에 대해 각각 법선을 구하고, 그 평균을 내서 적용시킨다.
+전과 비교해서 상당히 깔끔하고, 부드러운 조명 효과를 얻을 수 있다.
 
