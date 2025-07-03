@@ -1,6 +1,6 @@
 # Part 1 Classic OpenGL
 ## Color and Materials
-
+![image](https://github.com/user-attachments/assets/8c64f5aa-7374-4244-849a-165850f8ad45)
 
 1) 색상의 블렌딩(투명, 자연스러운 색상 설정)
 
@@ -34,7 +34,13 @@ glBlendFunc(GLenum S, GLenum D);
 ### 자주 쓰는 블렌딩 함수 조합
 
 1) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-source 색상을 받아, RGB값을 A 값에 곱한 다음, destination 색상의 RGB값을 (1-source의 Alpha 값)과 곱한 값에 더하는 연산 수행
+   
+source 색상을 받아, RGB값을 A 값에 곱한 다음,
+
+destination 색상의 RGB값을 (1-source의 Alpha 값)과 곱한 값에 더하는 연산 수행
+
 -> Interpolation!!
 
-   
+
+
+![image](https://github.com/user-attachments/assets/79b14516-5184-45a7-b7ae-9ae9f330a77f)
