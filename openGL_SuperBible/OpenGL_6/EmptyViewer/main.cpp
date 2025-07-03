@@ -1,4 +1,4 @@
-﻿#define CURRENT_LAB 3// ⭐ 여기 숫자만 바꿔서 실행할 lab 선택
+﻿#define CURRENT_LAB 5// ⭐ 여기 숫자만 바꿔서 실행할 lab 선택
 
 #if CURRENT_LAB == 1
 #include "6-1.cpp"
