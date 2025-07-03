@@ -258,3 +258,22 @@ tangent line : 곡선의 한 점만 접하면서 뻗어나가고, 다른 부분�
 그림자를 만드는 알고리즘은 매우 다양하다.
 
 
+지면에 그림자를 표현하는건
+
+물체를 그냥 지면에 투영(projection)시키고 검은색으로 바꾼게 다임!!
+
+
+### Z - Fighting(z-충돌)
+![image](https://github.com/user-attachments/assets/760e95d4-f46b-48db-b0f1-2040d9e9962f)
+
+두 물체가 같은 위치를 차지할때.,.,.,. 누구를 우선순위로 그려줘야하는가?
+
+이럴땐 
+
+1) 깊이 테스팅을 꺼준다.(바닥을 그릴때만!!)
+2) 그림자를 약간 뛰워서 그린다.
+3) depth buffer를 사용해서 우선순위값을 맥여준다.
+
+![image](https://github.com/user-attachments/assets/495bb8f0-c19f-40e6-8a53-8235f9b472d0)
+
+
