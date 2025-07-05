@@ -1,13 +1,15 @@
-# Part 1 Classic OpenGL
-## Texture Mapping
+![image](https://github.com/user-attachments/assets/8b765cc6-d728-4e84-a727-4d62a2f2e084)# Part 1 Classic OpenGL
+## Curve & Surface
 
+![image](https://github.com/user-attachments/assets/7c5f0325-cd22-439e-9633-af81e3b98ee0)
+### 이차 곡면
+2차 곡면은 객체로 사용된다.
 
+GLUQuadricObj 데이터 타입에 대한 포인트를 만들어서 사용.
 
+GLUquadric *q = gluNewQuadric();   
+gluQuadricDrawStyle(q,  …);        
+gluSphere(q, …);                   
+gluDeleteQuadric(q);               
 
-https://github.com/user-attachments/assets/d744495c-8b0b-4c22-a58d-a718ee53acc4
-
-![image](https://github.com/user-attachments/assets/bea33a01-9654-4f23-9112-44617043e956)
-![image](https://github.com/user-attachments/assets/6a747fbb-5d63-4a3f-b85d-12d0dafd0a64)
-![image](https://github.com/user-attachments/assets/bb899258-235b-445b-8beb-024fa95eec85)
-![image](https://github.com/user-attachments/assets/6982b725-ca33-47c4-8449-0ed2024c6fcb)
-![image](https://github.com/user-attachments/assets/2e9f719d-066b-4a12-ad39-6d54f0aa94dd)
+![image](https://github.com/user-attachments/assets/395e6fc1-8ff2-46d3-a2e2-5cc7e65a0d6b)
